@@ -6,11 +6,9 @@ import (
 	"net/http"
 
 	"github.com/fractalbach/sweet-server/backend/storage"
-
-	_ "github.com/lib/pq"
 )
 
-const version = "0.1"
+const version = "0.01"
 
 var store storage.Storage
 
@@ -27,7 +25,8 @@ func main() {
 
 func myHandler(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Fprintf(w, "You are at url: %s", r.URL.Path)
+	s := fmt.Sprintf("You are at url: %s\n%s", r.URL.Path, store.PrintWholeTable())
+	fmt.Fprintf(w, s)
 
 	// rows, err := db.Query("SELECT title FROM blog")
 	// if err != nil {
