@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# quick_update script is used in development to easily update the application
+# code without rebuilding the other services. Mostly, this is becaues I don't
+# want to wait for the database to rebuild.
+
+# rebuild the 'backend' service, which contains the application code
+docker compose up -d --no-deps --build backend
+
+# starts up the service again after it finishes building
+docker compose up -d backend
