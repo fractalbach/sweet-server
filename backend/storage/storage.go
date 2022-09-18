@@ -10,21 +10,23 @@ import (
 	_ "github.com/lib/pq" // postgres driver
 )
 
+const secretFile = `/run/secrets/db-password`
 const queryDropTable = `DROP TABLE IF EXISTS users;`
 const queryCreateTable = `
 CREATE TABLE IF NOT EXISTS users (
-    user_id   SERIAL,
-    username  TEXT,
-    data      TEXT
-);
-`
-const secretFile = `/run/secrets/db-password`
+	user_id   SERIAL,
+	username  TEXT,
+	data      TEXT
+);`
+const queryAddUser = `
+INSERT INTO users (user_id, username, data)
+VALUES ($1, $2, $3);`
 
 // User represents a user an also their web homepage data
 type User struct {
-	id   int
-	name string
-	data string
+	Id   uint
+	Name string
+	Data string
 }
 
 // Storage is an abstraction of a database for our application, so that we
@@ -85,6 +87,11 @@ func (s *Storage) PrintWholeTable() string {
 		output += fmt.Sprintln("(", id, username, data, ")")
 	}
 	return output
+}
+
+// AddUser creates and inserts a new user row into the database
+func (s *Storage) AddUser(user User) {
+	s.db.Exec(queryAddUser, user.Id, user.Name, user.Data)
 }
 
 func connect() *sql.DB {
