@@ -22,8 +22,17 @@ func main() {
 }
 
 func myHandler(w http.ResponseWriter, r *http.Request) {
-	s := fmt.Sprintf("You are at url: %s\n%s", r.URL.Path, store.PrintWholeTable())
-	fmt.Fprintf(w, s)
+	if r.URL.Path == "/" {
+		fmt.Fprintf(w, "Welcome! Here's a list of all users:\n%s", store.PrintWholeTable())
+	} else {
+		name := r.URL.Path[1:]
+		u, ok := store.GetUserDataByName(name)
+		if !ok {
+			fmt.Fprintf(w, "The user [%s] does not exist!", name)
+		} else {
+			fmt.Fprintf(w, "You are at url: %s\nHere is their data:\n%v", name, u)
+		}
+	}
 }
 
 func addExampleUsers() {

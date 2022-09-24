@@ -18,9 +18,6 @@ CREATE TABLE IF NOT EXISTS users (
 	username  TEXT,
 	data      TEXT
 );`
-const queryAddUser = `
-INSERT INTO users (user_id, username, data)
-VALUES ($1, $2, $3);`
 
 // User represents a user an also their web homepage data
 type User struct {
@@ -60,12 +57,6 @@ func (s *Storage) Init() {
 		log.Fatal("Database Table Creation Failed: ", err)
 	}
 
-	// for i := 0; i < 5; i++ {
-	// 	if _, err := db.Exec("INSERT INTO blog (title) VALUES ($1);", fmt.Sprintf("Blog post #%d", i)); err != nil {
-	// 		log.
-	// 	}
-	// }
-
 }
 
 // PrintWholeTable returns a string showing ALL data from the 'users' table
@@ -91,7 +82,20 @@ func (s *Storage) PrintWholeTable() string {
 
 // AddUser creates and inserts a new user row into the database
 func (s *Storage) AddUser(user User) {
+	const queryAddUser = `
+		INSERT INTO users (user_id, username, data)
+		VALUES ($1, $2, $3);`
 	s.db.Exec(queryAddUser, user.Id, user.Name, user.Data)
+}
+
+// GetUserDataByName fetches a user object from the data base, returns "false"
+// if that username does not exist. Assumes that usernames are unique, otherwise
+// it will return the first user found in the database.
+func (s *Storage) GetUserDataByName(name string) (User, bool) {
+	u := User{}
+	const queryGetUser = `SELECT * FROM users WHERE username=$1`
+	err := s.db.QueryRow(queryGetUser, name).Scan(&u.Id, &u.Name, &u.Data)
+	return u, err == nil
 }
 
 func connect() *sql.DB {
